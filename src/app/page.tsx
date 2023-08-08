@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css'
 import Map from '@/components/Map';
 import DetailsIP from "@/components/DetailsIP";
 import UserInput from "@/components/UserInput";
-import {FetchData} from '../utils/fetData'
+import {FetchGeoData,fetchSTDCode} from '../utils/fetData'
 
 export default function Home(){
   const inputRef = useRef<string>("");
@@ -14,20 +14,23 @@ export default function Home(){
   timeZone:'',
   isp:''
   });
+  const [stdData,setstdData] = useState([])
   const [cordinates,setCordinates] = useState([0,0])
   const getIpDetails = async()=>{
-    const address = inputRef.current.valueOf();
-    // const response = fetch(`${URL}${address}`);
-    console.log(address)
-    // const response = await FetchData(address)
-    // console.log(response)
-    // setDetailsData({
-    //   idAddress:data?.ip,
-    //   location:data?.location?.region + ", " + data?.location?.city,
-    //   timeZone:data?.location.timezone,
-    //   isp:data?.isp
-    // })
-    // setCordinates([data.location.lat, data.location.lng])
+    const address:any = inputRef.current.valueOf();
+    if(address){
+      FetchGeoData(address.value).then(async(res)=>{
+        const data:any= await res?.json();
+        console.log(data,'Geo Data')
+        setCordinates([data[0]?.latitude, data[0]?.longitude]);
+        fetchSTDCode(data[0].CityName).then(async(res:any)=> {
+          const data = await res.json();
+          console.log('std Data')
+        })
+        })
+    }
+
+    // console.log('std data',stdData)
   }
 
   return(
